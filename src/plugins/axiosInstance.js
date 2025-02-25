@@ -1,23 +1,19 @@
 // src/axiosInstance.js
 import axios from "axios";
 
-// Membuat instance Axios
 const axiosInstance = axios.create({
-  baseURL: "https://jsonplaceholder.typicode.com", // Ganti dengan base URL API Anda
-  timeout: 10000, // Waktu tunggu dalam milidetik
+  baseURL: import.meta.env.VITE_API_URL,
+  timeout: 10000,
   headers: {
-    "Content-Type": "application/json", // Header default
+    "Content-Type": "application/json",
   },
 });
 
-// Menangani respons dan kesalahan secara global (opsional)
 axiosInstance.interceptors.response.use(
   (response) => {
-    // Mengembalikan respons jika berhasil
     return response;
   },
   (error) => {
-    // Menangani kesalahan
     return Promise.reject(error);
   }
 );
