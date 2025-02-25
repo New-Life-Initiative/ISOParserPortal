@@ -44,7 +44,8 @@ const on = {
 
         outputText.value = output.value;
 
-        // console.log(output.value);
+        console.log(outputText.value.hex);
+        console.log(outputText.value.text);
       } catch (error) {
         console.log(error);
       }
@@ -103,18 +104,6 @@ const on = {
           rows="6"
         />
 
-        <!-- <v-row>
-          <v-col cols="12">
-            <p class="text-body-2 mb-2">Character encoding</p>
-            <v-select
-              v-model="encoding"
-              :items="encodings"
-              variant="outlined"
-              density="compact"
-            />
-          </v-col>
-        </v-row> -->
-
         <v-row class="my-2">
           <v-col>
             <v-btn
@@ -132,19 +121,21 @@ const on = {
             >
               Reset
             </v-btn>
-            <!-- <v-btn
-              color="grey-darken-1"
-              variant="tonal"
-              prepend-icon="mdi-swap-horizontal"
-            >
-              Swap
-            </v-btn> -->
           </v-col>
         </v-row>
 
         <v-textarea
-          v-model="outputText"
+          v-if="outputText.hex"
+          v-model="outputText.hex"
           label="Hex output"
+          variant="outlined"
+          rows="6"
+          readonly
+        />
+        <v-textarea
+          v-if="outputText.text"
+          v-model="outputText.text"
+          label="Text output"
           variant="outlined"
           rows="6"
           readonly
