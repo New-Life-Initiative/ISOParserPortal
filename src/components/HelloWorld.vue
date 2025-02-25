@@ -1,14 +1,21 @@
+<script setup>
+import { usePackageStore } from "./../stores/packager.js";
+import { storeToRefs } from "pinia";
+import { onBeforeMount } from "vue";
+
+const packageStore = usePackageStore();
+const { PACKAGER } = storeToRefs(packageStore);
+
+onBeforeMount(() => {
+  console.log(PACKAGER.value);
+  console.log(process.env.VUE_APP_API_URL);
+});
+</script>
+
 <template>
   <v-container class="fill-height">
-    <v-responsive
-      class="align-centerfill-height mx-auto"
-      max-width="900"
-    >
-      <v-img
-        class="mb-4"
-        height="150"
-        src="@/assets/logo.png"
-      />
+    <v-responsive class="align-centerfill-height mx-auto" max-width="900">
+      <v-img class="mb-4" height="150" src="@/assets/logo.png" />
 
       <div class="text-center">
         <div class="text-body-2 font-weight-light mb-n1">Welcome to</div>
@@ -38,7 +45,9 @@
 
             <template #subtitle>
               <div class="text-subtitle-1">
-                Replace this page by removing <v-kbd>{{ `<HelloWorld />` }}</v-kbd> in <v-kbd>pages/index.vue</v-kbd>.
+                Replace this page by removing
+                <v-kbd>{{ `<HelloWorld />` }}</v-kbd> in
+                <v-kbd>pages/index.vue</v-kbd>.
               </div>
             </template>
 
@@ -151,7 +160,3 @@
     </v-responsive>
   </v-container>
 </template>
-
-<script setup>
-  //
-</script>
