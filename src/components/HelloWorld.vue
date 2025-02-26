@@ -3,6 +3,7 @@ import { usePackageStore } from "./../stores/packager.js";
 import { storeToRefs } from "pinia";
 import { onBeforeMount } from "vue";
 import { ref } from "vue";
+import { js_beautify } from "js-beautify";
 
 const inputText = ref("");
 const outputText = ref("");
@@ -55,7 +56,12 @@ const on = {
                 );
 
                 output.value = res;
+
+                outputText.value = {};
+
+                outputText.value = JSON.stringify(output.value.json);
               }
+              break;
           }
         }
       } catch (error) {
@@ -105,6 +111,16 @@ const module = {
       document.execCommand("copy");
       document.body.removeChild(textarea);
       alert("Text copied to clipboard!");
+    },
+  },
+  beautify: {
+    beautifyJson() {
+      try {
+        const json = JSON.parse(outputText.value); // Parsing input JSON
+        outputText.value = js_beautify(JSON.stringify(json, null, 2)); // Beautify JSON
+      } catch (error) {
+        console.error("Invalid JSON input:", error);
+      }
     },
   },
 };
@@ -205,6 +221,43 @@ const module = {
               Copy
             </v-btn>
           </v-col>
+        </v-row>
+
+        <v-row class="my-2" v-if="outputText">
+          <v-col>
+            <v-textarea
+              v-model="outputText"
+              label="Text output"
+              variant="outlined"
+              rows="6"
+              readonly
+            />
+          </v-col>
+        </v-row>
+
+        <v-row class="my-2" v-if="outputText">
+          <v-col class="d-flex justify-space-between">
+            <v-btn
+              color="success"
+              prepend-icon="mdi-content-copy"
+              @click="module.copy.copyToClipboard(outputText)"
+              :disabled="!outputText"
+            >
+              Copy
+            </v-btn>
+            <v-btn
+              class="mx-2"
+              color="grey-darken-1"
+              prepend-icon="mdi-content-cut"
+              @click="module.beautify.beautifyJson"
+              :disabled="!outputText"
+            >
+              Beautify
+            </v-btn>
+          </v-col>
+        </v-row>
+        <v-row class="my-2" v-if="outputText">
+          <v-col> </v-col>
         </v-row>
 
         <v-row class="my-2" v-if="outputText.hex">
