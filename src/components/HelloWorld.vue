@@ -27,26 +27,39 @@ watch(inputText, () => {
 const on = {
   submit: {
     async click() {
-      if (fromInput.value && toInput.value) {
-        switch (fromInput.value) {
-          case "JSON":
-            if (toInput.value === "FixedLength") {
-              generateUrl.value = `/parser/to/fixedlength/${packagerInput.value}`;
-            }
-            break;
-          // case "FixedLength":
-          //   if
-        }
-      }
-
       try {
-        const res = await packageStore.convert(payload.value, generateUrl);
+        if (fromInput.value && toInput.value) {
+          switch (fromInput.value) {
+            case "JSON":
+              if (toInput.value === "FixedLength") {
+                generateUrl.value = `/parser/to/fixedlength/${packagerInput.value}`;
 
-        output.value = res;
+                const res = await packageStore.convert(
+                  payload.value,
+                  generateUrl
+                );
 
-        outputText.value = output.value;
+                output.value = res;
+
+                outputText.value = output.value;
+              }
+              break;
+            case "FixedLength":
+              if (toInput.value === "JSON") {
+                generateUrl.value = `/parser/${formatInput.value}/to/json/${packagerInput.value}`;
+
+                const res = await packageStore.convert(
+                  payload.value,
+                  generateUrl,
+                  "text/plain"
+                );
+
+                output.value = res;
+              }
+          }
+        }
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     },
   },
@@ -85,18 +98,13 @@ const module = {
   },
   copy: {
     copyToClipboard(text) {
-      console.log(text);
-      try {
-        const textarea = document.createElement("textarea");
-        textarea.value = text;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textarea);
-        alert("Text copied to clipboard!");
-      } catch (err) {
-        console.error("Failed to copy text: ", err);
-      }
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      alert("Text copied to clipboard!");
     },
   },
 };
@@ -199,22 +207,55 @@ const module = {
           </v-col>
         </v-row>
 
-        <v-textarea
-          v-if="outputText.hex"
-          v-model="outputText.hex"
-          label="Hex output"
-          variant="outlined"
-          rows="6"
-          readonly
-        />
-        <v-textarea
-          v-if="outputText.text"
-          v-model="outputText.text"
-          label="Text output"
-          variant="outlined"
-          rows="6"
-          readonly
-        />
+        <v-row class="my-2" v-if="outputText.hex">
+          <v-col>
+            <v-textarea
+              v-model="outputText.hex"
+              label="Hex output"
+              variant="outlined"
+              rows="6"
+              readonly
+            />
+          </v-col>
+        </v-row>
+
+        <v-row class="my-2" v-if="outputText.hex">
+          <v-col>
+            <v-btn
+              color="success"
+              prepend-icon="mdi-content-copy"
+              @click="module.copy.copyToClipboard(outputText.hex)"
+              :disabled="!outputText.hex"
+            >
+              Copy
+            </v-btn>
+          </v-col>
+        </v-row>
+
+        <v-row class="my-2" v-if="outputText.text">
+          <v-col>
+            <v-textarea
+              v-model="outputText.text"
+              label="Text output"
+              variant="outlined"
+              rows="6"
+              readonly
+            />
+          </v-col>
+        </v-row>
+
+        <v-row class="my-2" v-if="outputText.text">
+          <v-col>
+            <v-btn
+              color="success"
+              prepend-icon="mdi-content-copy"
+              @click="module.copy.copyToClipboard(outputText.text)"
+              :disabled="!outputText.text"
+            >
+              Copy
+            </v-btn>
+          </v-col>
+        </v-row>
       </v-card>
     </v-responsive>
   </v-container>

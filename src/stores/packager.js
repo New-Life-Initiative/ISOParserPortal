@@ -23,9 +23,13 @@ export const usePackageStore = defineStore("packager", () => {
     }
   }
 
-  async function convert(reqBody, url) {
+  async function convert(reqBody, url, contentType) {
     try {
-      const res = await axiosInstance.post(`${url.value}`, reqBody);
+      const res = await axiosInstance.post(`${url.value}`, reqBody, {
+        headers: {
+          "Content-Type": `${contentType ?? "application/json"}`,
+        },
+      });
 
       output.value = res.data.produce;
 
