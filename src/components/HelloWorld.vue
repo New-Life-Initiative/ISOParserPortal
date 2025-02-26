@@ -61,6 +61,45 @@ const on = {
     },
   },
 };
+
+const module = {
+  rule: {
+    submit() {
+      let commonRule =
+        !!inputText.value &&
+        !!fromInput.value &&
+        !!toInput.value &&
+        !!packagerInput.value;
+
+      let formatRule =
+        fromInput.value === "FixedLength" &&
+        toInput.value === "JSON" &&
+        !formatInput.value;
+
+      if (formatRule) {
+        return formatRule;
+      }
+
+      return !commonRule;
+    },
+  },
+  copy: {
+    copyToClipboard(text) {
+      console.log(text);
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+        alert("Text copied to clipboard!");
+      } catch (err) {
+        console.error("Failed to copy text: ", err);
+      }
+    },
+  },
+};
 </script>
 
 <template>
@@ -134,6 +173,7 @@ const on = {
               color="success"
               prepend-icon="mdi-equal"
               @click="on.submit.click"
+              :disabled="module.rule.submit()"
             >
               Convert
             </v-btn>
@@ -145,6 +185,16 @@ const on = {
               @click="on.reset.click"
             >
               Reset
+            </v-btn>
+            <v-btn
+              class="mx-2"
+              color="grey-darken-1"
+              variant="tonal"
+              prepend-icon="mdi-content-copy"
+              @click="module.copy.copyToClipboard(inputText)"
+              :disabled="!inputText"
+            >
+              Copy
             </v-btn>
           </v-col>
         </v-row>
