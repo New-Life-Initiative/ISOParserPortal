@@ -6,11 +6,11 @@ import { ref } from "vue";
 
 const inputText = ref("");
 const outputText = ref("");
-const fromInput = ref(null);
-const toInput = ref(null);
-const packagerInput = ref(null);
-const formatInput = ref(null);
-const generateUrl = ref(null);
+const fromInput = ref();
+const toInput = ref();
+const packagerInput = ref();
+const formatInput = ref();
+const generateUrl = ref();
 
 const packageStore = usePackageStore();
 const { PACKAGER, FROM, TO, FORMAT, payload, output } =
@@ -34,6 +34,8 @@ const on = {
               generateUrl.value = `/parser/to/fixedlength/${packagerInput.value}`;
             }
             break;
+          // case "FixedLength":
+          //   if
         }
       }
 
@@ -43,12 +45,19 @@ const on = {
         output.value = res;
 
         outputText.value = output.value;
-
-        console.log(outputText.value.hex);
-        console.log(outputText.value.text);
       } catch (error) {
         console.log(error);
       }
+    },
+  },
+  reset: {
+    click() {
+      (inputText.value = ""),
+        (outputText.value = ""),
+        (fromInput.value = ""),
+        (toInput.value = ""),
+        (packagerInput.value = ""),
+        (formatInput.value = "");
     },
   },
 };
@@ -83,6 +92,18 @@ const on = {
           </v-col>
         </v-row>
 
+        <v-row v-if="fromInput === 'FixedLength' && toInput === 'JSON'">
+          <v-col cols="12">
+            <v-select
+              v-model="formatInput"
+              :items="FORMAT"
+              label="Format List"
+              density="compact"
+              variant="outlined"
+            />
+          </v-col>
+        </v-row>
+
         <v-row>
           <v-col cols="12">
             <v-select
@@ -95,14 +116,17 @@ const on = {
           </v-col>
         </v-row>
 
-        <p class="text-body-2 mb-2">Paste text</p>
-
-        <v-textarea
-          v-model="inputText"
-          label="Text input"
-          variant="outlined"
-          rows="6"
-        />
+        <v-row>
+          <v-col cols="12">
+            <v-textarea
+              v-model="inputText"
+              label="Text input"
+              variant="outlined"
+              rows="6"
+              clearable
+            />
+          </v-col>
+        </v-row>
 
         <v-row class="my-2">
           <v-col>
@@ -118,6 +142,7 @@ const on = {
               color="grey-darken-1"
               variant="tonal"
               prepend-icon="mdi-refresh"
+              @click="on.reset.click"
             >
               Reset
             </v-btn>

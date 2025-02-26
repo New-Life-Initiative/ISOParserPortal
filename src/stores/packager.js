@@ -5,10 +5,10 @@ import axiosInstance from "@/plugins/axiosInstance";
 export const usePackageStore = defineStore("packager", () => {
   /* State */
   const PACKAGER = ref();
-  const FROM = ref(["JSON", "Custom"]);
+  const FROM = ref(["JSON", "Custom", "FixedLength"]);
   const TO = ref(["FixedLength", "JSON"]);
   const payload = ref();
-  const FORMAT = ref(["Hex", "String"]);
+  const FORMAT = ref(["Hex", "Text"]);
   const output = ref();
 
   async function getPackageList() {
