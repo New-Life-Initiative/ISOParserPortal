@@ -3,6 +3,7 @@ import { usePackageStore } from "./../stores/packager.js";
 import { storeToRefs } from "pinia";
 import { onBeforeMount } from "vue";
 import { ref } from "vue";
+import { js_beautify } from "js-beautify";
 
 const inputText = ref("");
 const outputText = ref("");
@@ -24,11 +25,18 @@ watch(inputText, () => {
   packageStore.setRequestBody(inputText.value);
 });
 
-watch([fromInput, toInput, packagerInput], async ([newFrom, newTo, newPackager]) => {
-  if (newPackager && newFrom === 'Custom' && (newTo === 'FixedLength' || newTo === 'JSON')) {
-    await packageStore.getIsoProperty(newPackager);
+watch(
+  [fromInput, toInput, packagerInput],
+  async ([newFrom, newTo, newPackager]) => {
+    if (
+      newPackager &&
+      newFrom === "Custom" &&
+      (newTo === "FixedLength" || newTo === "JSON")
+    ) {
+      await packageStore.getIsoProperty(newPackager);
+    }
   }
-});
+);
 
 const on = {
   submit: {
@@ -48,6 +56,8 @@ const on = {
                 output.value = res;
 
                 outputText.value = output.value;
+
+                console.log(output.value);
               }
               break;
             case "FixedLength":
@@ -61,12 +71,24 @@ const on = {
                 );
 
                 output.value = res;
+
+                outputText.value = output.value;
+
+                outputText.value.json = JSON.stringify(
+                  outputText.value.json,
+                  null,
+                  2
+                );
+                console.log(outputText.value);
               }
-              break
+              break;
             case "Custom":
               if (toInput.value === "FixedLength") {
                 generateUrl.value = `/parser/custom/to/fixedlength/${packagerInput.value}`;
-                const res = await packageStore.convert(payload.value, generateUrl);
+                const res = await packageStore.convert(
+                  payload.value,
+                  generateUrl
+                );
                 output.value = res;
                 outputText.value = output.value;
               } else if (toInput.value === "JSON") {
@@ -84,19 +106,19 @@ const on = {
                 console.log("Response from packageStore.convert:", res);
 
                 output.value = res;
-                
-                if (res && res.produce && res.produce.json) {
-                  console.log("JSON output found, formatting...");
-                  outputText.value = JSON.stringify(res.produce, null, 2);
-                  console.log("Formatted JSON output:", outputText.value);
-                } else {
-                  console.log("No JSON output available");
-                  outputText.value = "No JSON output available";
-                }
+
+                outputText.value = output.value;
+
+                outputText.value.json = JSON.stringify(
+                  outputText.value.json,
+                  null,
+                  2
+                );
+                console.log(outputText.value);
               }
               break;
+          }
         }
-      }
       } catch (error) {
         console.error(error);
       }
@@ -146,6 +168,22 @@ const module = {
       alert("Text copied to clipboard!");
     },
   },
+  beautify: {
+    beautifyJson() {
+      try {
+        // // Ensure outputText.value is a string
+        // const jsonString =
+        //   typeof outputText.value === "string"
+        //     ? outputText.value
+        //     : JSON.stringify(outputText.value);
+        // const json = JSON.parse(jsonString); // Parsing input JSON
+        // outputText.value = js_beautify(JSON.stringify(json, null, 2)); // Beautify JSON
+        outputText.value = js_beautify(outputText.value.json); // Beautify JSON
+      } catch (error) {
+        console.error("Invalid JSON input:", error);
+      }
+    },
+  },
 };
 </script>
 
@@ -178,7 +216,12 @@ const module = {
           </v-col>
         </v-row>
 
-        <v-row v-if="(fromInput === 'FixedLength' || fromInput === 'Custom') && toInput === 'JSON'">
+        <v-row
+          v-if="
+            (fromInput === 'FixedLength' || fromInput === 'Custom') &&
+            toInput === 'JSON'
+          "
+        >
           <v-col cols="12">
             <v-select
               v-model="formatInput"
@@ -243,6 +286,40 @@ const module = {
             >
               Copy
             </v-btn>
+          </v-col>
+        </v-row>
+
+        <v-row class="my-2" v-if="outputText.json">
+          <v-col>
+            <v-textarea
+              v-model="outputText.json"
+              label="Text output"
+              variant="outlined"
+              rows="6"
+              readonly
+            />
+          </v-col>
+        </v-row>
+
+        <v-row class="my-2" v-if="outputText.json">
+          <v-col class="d-flex justify-space-between">
+            <v-btn
+              color="success"
+              prepend-icon="mdi-content-copy"
+              @click="module.copy.copyToClipboard(JSON.parse(outputText.json))"
+              :disabled="!outputText.json"
+            >
+              Copy
+            </v-btn>
+            <!-- <v-btn
+              class="mx-2"
+              color="grey-darken-1"
+              prepend-icon="mdi-content-cut"
+              @click="module.beautify.beautifyJson"
+              :disabled="!outputText.json"
+            >
+              Beautify
+            </v-btn> -->
           </v-col>
         </v-row>
 
