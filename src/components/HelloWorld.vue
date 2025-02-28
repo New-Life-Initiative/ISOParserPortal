@@ -43,6 +43,8 @@ const on = {
                 output.value = res;
 
                 outputText.value = output.value;
+
+                console.log(output.value);
               }
               break;
             case "FixedLength":
@@ -57,9 +59,14 @@ const on = {
 
                 output.value = res;
 
-                outputText.value = {};
+                outputText.value = output.value;
 
-                outputText.value = JSON.stringify(output.value.json);
+                outputText.value.json = JSON.stringify(
+                  outputText.value.json,
+                  null,
+                  2
+                );
+                console.log(outputText.value);
               }
               break;
           }
@@ -116,8 +123,14 @@ const module = {
   beautify: {
     beautifyJson() {
       try {
-        const json = JSON.parse(outputText.value); // Parsing input JSON
-        outputText.value = js_beautify(JSON.stringify(json, null, 2)); // Beautify JSON
+        // // Ensure outputText.value is a string
+        // const jsonString =
+        //   typeof outputText.value === "string"
+        //     ? outputText.value
+        //     : JSON.stringify(outputText.value);
+        // const json = JSON.parse(jsonString); // Parsing input JSON
+        // outputText.value = js_beautify(JSON.stringify(json, null, 2)); // Beautify JSON
+        outputText.value = js_beautify(outputText.value.json); // Beautify JSON
       } catch (error) {
         console.error("Invalid JSON input:", error);
       }
@@ -223,10 +236,10 @@ const module = {
           </v-col>
         </v-row>
 
-        <v-row class="my-2" v-if="outputText">
+        <v-row class="my-2" v-if="outputText.json">
           <v-col>
             <v-textarea
-              v-model="outputText"
+              v-model="outputText.json"
               label="Text output"
               variant="outlined"
               rows="6"
@@ -235,29 +248,26 @@ const module = {
           </v-col>
         </v-row>
 
-        <v-row class="my-2" v-if="outputText">
+        <v-row class="my-2" v-if="outputText.json">
           <v-col class="d-flex justify-space-between">
             <v-btn
               color="success"
               prepend-icon="mdi-content-copy"
-              @click="module.copy.copyToClipboard(outputText)"
-              :disabled="!outputText"
+              @click="module.copy.copyToClipboard(JSON.parse(outputText.json))"
+              :disabled="!outputText.json"
             >
               Copy
             </v-btn>
-            <v-btn
+            <!-- <v-btn
               class="mx-2"
               color="grey-darken-1"
               prepend-icon="mdi-content-cut"
               @click="module.beautify.beautifyJson"
-              :disabled="!outputText"
+              :disabled="!outputText.json"
             >
               Beautify
-            </v-btn>
+            </v-btn> -->
           </v-col>
-        </v-row>
-        <v-row class="my-2" v-if="outputText">
-          <v-col> </v-col>
         </v-row>
 
         <v-row class="my-2" v-if="outputText.hex">
