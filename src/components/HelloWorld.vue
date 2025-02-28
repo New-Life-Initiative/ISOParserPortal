@@ -24,6 +24,12 @@ watch(inputText, () => {
   packageStore.setRequestBody(inputText.value);
 });
 
+watch([fromInput, toInput, packagerInput], async ([newFrom, newTo, newPackager]) => {
+  if (newPackager && newFrom === 'Custom' && (newTo === 'FixedLength' || newTo === 'JSON')) {
+    await packageStore.getIsoProperty(newPackager);
+  }
+});
+
 const on = {
   submit: {
     async click() {
@@ -56,8 +62,41 @@ const on = {
 
                 output.value = res;
               }
-          }
+              break
+            case "Custom":
+              if (toInput.value === "FixedLength") {
+                generateUrl.value = `/parser/custom/to/fixedlength/${packagerInput.value}`;
+                const res = await packageStore.convert(payload.value, generateUrl);
+                output.value = res;
+                outputText.value = output.value;
+              } else if (toInput.value === "JSON") {
+                console.log("Condition met: toInput is 'JSON'");
+
+                generateUrl.value = `/parser/custom/${formatInput.value}/to/json/${packagerInput.value}`;
+                console.log("Generated URL:", generateUrl.value);
+
+                const res = await packageStore.convert(
+                  payload.value,
+                  generateUrl,
+                  "text/plain"
+                );
+
+                console.log("Response from packageStore.convert:", res);
+
+                output.value = res;
+                
+                if (res && res.produce && res.produce.json) {
+                  console.log("JSON output found, formatting...");
+                  outputText.value = JSON.stringify(res.produce, null, 2);
+                  console.log("Formatted JSON output:", outputText.value);
+                } else {
+                  console.log("No JSON output available");
+                  outputText.value = "No JSON output available";
+                }
+              }
+              break;
         }
+      }
       } catch (error) {
         console.error(error);
       }
@@ -139,7 +178,7 @@ const module = {
           </v-col>
         </v-row>
 
-        <v-row v-if="fromInput === 'FixedLength' && toInput === 'JSON'">
+        <v-row v-if="(fromInput === 'FixedLength' || fromInput === 'Custom') && toInput === 'JSON'">
           <v-col cols="12">
             <v-select
               v-model="formatInput"
